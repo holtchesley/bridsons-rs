@@ -1,0 +1,7 @@
+[package]
+name = "bridsons"
+version = "0.1.0"
+authors = ["Brennan Chesley <holtchesley@example.com>"]
+
+[dependencies]
+rand = "0.3"
