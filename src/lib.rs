@@ -27,21 +27,21 @@ pub mod bridsons {
         pub fn d(&self,other: &Point2d) -> f32{
             let xd = other.x - self.x;
             let yd = other.y - self.y;
-            return xd.hypot(yd);
+            xd.hypot(yd)
         }
 
         pub fn rand_in_annulus(&self, r: f32, rand: &mut Rng) -> Point2d {
             let radius = rand.next_f32().mul_add(r,r);
             let (xd,yd) = (rand.next_f32() * f32::consts::PI).sin_cos();
-            return Point2d{x:xd*radius+ self.x, y:yd*radius+self.y}
+            Point2d{x:xd*radius+ self.x, y:yd*radius+self.y}
         }
 
         pub fn in_box(&self, other: &Point2d) -> bool {
-            return (self.x < other.x) && (self.y < other.y) && (self.x > 0.0) && (self.y > 0.0)
+            (self.x < other.x) && (self.y < other.y) && (self.x > 0.0) && (self.y > 0.0)
         }
 
         pub fn within_r(&self, r: f32, other: &Point2d) -> bool {
-            return self.d(other) < r;
+            self.d(other) < r
         }
 
     }
@@ -49,31 +49,24 @@ pub mod bridsons {
 
     pub struct Grid2d {
         grid_size: f32,
-        width: u32,
-        height: u32,
         grid: HashMap<(u32,u32),Point2d>
     }
 
     impl Grid2d {
-        pub fn new() -> Grid2d {
-            Grid2d{grid_size: 0.0, width: 0, height: 0, grid: HashMap::new()}
-        }
-
-        pub fn init_rect(&mut self, width:f32, height:f32, radius:f32) {
-            self.grid_size = radius / SQRT2;
-            self.width = (width/self.grid_size).floor() as u32;
-            self.height = (height/self.grid_size).floor() as u32;
+        pub fn from_radius(radius:f32) -> Grid2d {
+            let grid_size = radius / SQRT2;
+            Grid2d{grid_size: grid_size, grid: HashMap::new()}
         }
 
         fn grid_coord(&self, point: &Point2d) -> (u32, u32){
-            return ((point.x / self.grid_size).floor() as u32,(point.y / self.grid_size).floor() as u32)
+            ((point.x / self.grid_size).floor() as u32,(point.y / self.grid_size).floor() as u32)
         }
 
         pub fn has_nearby(&self, r: f32, point: &Point2d) -> bool {
-            let (cx,cy) = self.grid_coord(point);
             fn buf_dec(a:u32) -> u32 {
                 if a > 1 {a-1} else {0}
             }
+            let (cx,cy) = self.grid_coord(point);
             for xx in buf_dec(cx)..(cx+2) {
                 for yy in buf_dec(cy)..(cy+2) {
                     if let Some(pt) = self.grid.get(&(xx,yy)) {
@@ -83,7 +76,7 @@ pub mod bridsons {
                     }
                 }
             }
-            return false;
+            false
         }
 
         pub fn add_point(&mut self, point: Point2d) {
@@ -95,9 +88,8 @@ pub mod bridsons {
     pub fn bridsons_method_2d(width: f32, height: f32, radius: f32, attempts:u32, seed: &mut Rng) -> Vec<Point2d> {
         let mut active_set = vec![];
         let mut inactive_set = vec![];
-        let mut grid = Grid2d::new();
+        let mut grid = Grid2d::from_radius(radius);
         let ur_corner = Point2d{x:width, y:height};
-        grid.init_rect(width, height, radius);
         let pt = Point2d::rand_in_rect(width, height, seed);
         active_set.push(pt.to_owned());
         grid.add_point(pt);
@@ -115,7 +107,7 @@ pub mod bridsons {
 
         }
 
-        return inactive_set;
+        inactive_set
     }
 
     #[cfg(test)]
